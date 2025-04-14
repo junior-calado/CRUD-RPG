@@ -28,4 +28,11 @@ export class Character {
   defense: number;
 }
 
-export const CharacterSchema = SchemaFactory.createForClass(Character); 
+export const CharacterSchema = SchemaFactory.createForClass(Character);
+
+CharacterSchema.pre('validate', function(next) {
+  if (this.strength + this.defense !== 10) {
+    this.invalidate('strength', 'Strength and defense must sum to 10');
+  }
+  next();
+}); 
