@@ -9,43 +9,66 @@ export class MagicalItemController {
   constructor(private readonly magicalItemService: MagicalItemService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Cadastrar Item Mágico' })
-  @ApiResponse({ status: 201, description: 'Item mágico criado com sucesso' })
+  @ApiOperation({ summary: 'Register Magical Item', description: 'Create a new magical item with specified attributes.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Magical item successfully created',
+    schema: {
+      example: {
+        id: 'item001',
+        name: 'Sword of Power',
+        type: 'Weapon',
+        strength: 10,
+        defense: 0
+      }
+    }
+  })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Validation failed: Invalid magical item type or attributes' })
   create(@Body() createMagicalItemDto: CreateMagicalItemDto) {
     return this.magicalItemService.create(createMagicalItemDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar Itens Mágicos' })
-  @ApiResponse({ status: 200, description: 'Lista de itens mágicos retornada com sucesso' })
+  @ApiOperation({ summary: 'List Magical Items' })
+  @ApiResponse({ status: 200, description: 'Magical items list successfully returned' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
   findAll() {
     return this.magicalItemService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Buscar Item Mágico por Identificador' })
-  @ApiResponse({ status: 200, description: 'Item mágico encontrado' })
+  @ApiOperation({ summary: 'Find Magical Item by ID' })
+  @ApiResponse({ status: 200, description: 'Magical item found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Validation failed: Invalid magical item type or attributes' })
   findOne(@Param('id') id: string) {
     return this.magicalItemService.findOne(id);
   }
 
   @Get('character/:characterId')
-  @ApiOperation({ summary: 'Listar Itens Mágicos por Personagem' })
-  @ApiResponse({ status: 200, description: 'Lista de itens mágicos do personagem retornada com sucesso' })
+  @ApiOperation({ summary: 'List Magical Items by Character' })
+  @ApiResponse({ status: 200, description: 'Magical items list for character successfully returned' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Validation failed: Invalid magical item type or attributes' })
   findByCharacterId(@Param('characterId') characterId: string) {
     return this.magicalItemService.findByCharacterId(characterId);
   }
 
   @Get('character/:characterId/amulet')
-  @ApiOperation({ summary: 'Buscar Amuleto do Personagem' })
-  @ApiResponse({ status: 200, description: 'Amuleto do personagem encontrado' })
+  @ApiOperation({ summary: 'Find Character Amulet' })
+  @ApiResponse({ status: 200, description: 'Character amulet found' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Validation failed: Invalid magical item type or attributes' })
   findAmuletByCharacterId(@Param('characterId') characterId: string) {
     return this.magicalItemService.findAmuletByCharacterId(characterId);
   }
 
   @Put(':id/assign/:characterId')
-  @ApiOperation({ summary: 'Adicionar Item Mágico ao Personagem' })
-  @ApiResponse({ status: 200, description: 'Item mágico adicionado ao personagem com sucesso' })
+  @ApiOperation({ summary: 'Assign Magical Item to Character' })
+  @ApiResponse({ status: 200, description: 'Magical item successfully assigned to character' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Validation failed: Invalid magical item type or attributes' })
   assignToCharacter(
     @Param('id') id: string,
     @Param('characterId') characterId: string,
@@ -53,17 +76,25 @@ export class MagicalItemController {
     return this.magicalItemService.assignToCharacter(id, characterId);
   }
 
-  @Put(':id/remove')
-  @ApiOperation({ summary: 'Remover Item Mágico do Personagem' })
-  @ApiResponse({ status: 200, description: 'Item mágico removido do personagem com sucesso' })
-  removeFromCharacter(@Param('id') id: string) {
-    return this.magicalItemService.removeFromCharacter(id);
+  @Put(':id/remove/:characterId')
+  @ApiOperation({ summary: 'Remove Magical Item from Character' })
+  @ApiResponse({ status: 200, description: 'Magical item successfully removed from character' })
+  @ApiResponse({ status: 404, description: 'Item not found or not associated with the character' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Validation failed: Invalid magical item type or attributes' })
+  removeFromCharacter(
+    @Param('id') id: string,
+    @Param('characterId') characterId: string,
+  ) {
+    return this.magicalItemService.removeFromCharacter(id, characterId);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Remover Item Mágico' })
-  @ApiResponse({ status: 200, description: 'Item mágico removido com sucesso' })
+  @ApiOperation({ summary: 'Remove Magical Item' })
+  @ApiResponse({ status: 200, description: 'Magical item successfully removed' })
+  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({ status: 400, description: 'Validation failed: Invalid magical item type or attributes' })
   remove(@Param('id') id: string) {
     return this.magicalItemService.delete(id);
   }
-} 
+}

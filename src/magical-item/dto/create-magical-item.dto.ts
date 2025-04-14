@@ -1,9 +1,9 @@
 import { IsString, IsEnum, IsInt, Min, Max, ValidateIf } from 'class-validator';
 
 export enum MagicalItemType {
-  WEAPON = 'Arma',
-  ARMOR = 'Armadura',
-  AMULET = 'Amuleto',
+  WEAPON = 'Weapon',
+  ARMOR = 'Armor',
+  AMULET = 'Amulet',
 }
 
 export class CreateMagicalItemDto {
@@ -27,4 +27,4 @@ export class CreateMagicalItemDto {
   @Min(0)
   @Max(10)
   defense: number;
-} 
+}

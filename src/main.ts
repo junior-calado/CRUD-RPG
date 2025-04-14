@@ -9,8 +9,10 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('RPG Game Management System')
-    .setDescription('API para gerenciamento de personagens e itens mágicos de RPG')
+    .setDescription('API for managing RPG characters and magical items. Includes detailed examples and error handling.')
     .setVersion('1.0')
+    .addTag('Characters', 'Endpoints for managing RPG characters')
+    .addTag('Magical Items', 'Endpoints for managing magical items')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

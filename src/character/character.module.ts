@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CharacterController } from './character.controller';
 import { CharacterService } from './character.service';
@@ -10,10 +10,10 @@ import { MagicalItemModule } from '../magical-item/magical-item.module';
     MongooseModule.forFeature([
       { name: Character.name, schema: CharacterSchema },
     ]),
-    MagicalItemModule,
+    forwardRef(() => MagicalItemModule),
   ],
   controllers: [CharacterController],
   providers: [CharacterService],
-  exports: [CharacterService],
+  exports: [CharacterService, MongooseModule],
 })
-export class CharacterModule {} 
+export class CharacterModule {}

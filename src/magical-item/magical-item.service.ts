@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MagicalItem, MagicalItemDocument } from './schemas/magical-item.schema';
 import { CreateMagicalItemDto } from './dto/create-magical-item.dto';
 import { MagicalItemType } from './dto/create-magical-item.dto';
+import { Character, CharacterDocument } from '../character/schemas/character.schema';
 
 @Injectable()
 export class MagicalItemService {
   constructor(
     @InjectModel(MagicalItem.name)
     private magicalItemModel: Model<MagicalItemDocument>,
-  ) { }
+    @InjectModel(Character.name)
+    private characterModel: Model<CharacterDocument>,
+  ) {}
 
   async create(createMagicalItemDto: CreateMagicalItemDto): Promise<MagicalItem> {
     const createdItem = new this.magicalItemModel(createMagicalItemDto);
@@ -36,24 +39,38 @@ export class MagicalItemService {
     const item = await this.magicalItemModel.findOne({ id: itemId });
 
     if (!item) {
-      throw new Error('Item not found');
+      throw new NotFoundException('Item not found');
     }
 
     if (item.type === MagicalItemType.AMULET) {
       const existingAmulet = await this.findAmuletByCharacterId(characterId);
       if (existingAmulet) {
-        throw new Error('Character already has an amulet');
+        throw new BadRequestException('Character already has an amulet');
       }
     }
 
-    return this.magicalItemModel.findOneAndUpdate(
+    const updatedItem = await this.magicalItemModel.findOneAndUpdate(
       { id: itemId },
       { characterId },
       { new: true },
     ).exec();
+
+    await this.characterModel.findOneAndUpdate(
+      { id: characterId },
+      { $addToSet: { magicalItems: itemId } },
+      { new: true },
+    ).exec();
+
+    return updatedItem;
   }
 
-  async removeFromCharacter(itemId: string): Promise<MagicalItem | null> {
+  async removeFromCharacter(itemId: string, characterId: string): Promise<MagicalItem | null> {
+    const item = await this.magicalItemModel.findOne({ id: itemId, characterId });
+
+    if (!item) {
+      throw new NotFoundException('Item not found or not associated with the character');
+    }
+
     return this.magicalItemModel.findOneAndUpdate(
       { id: itemId },
       { characterId: null },
@@ -69,5 +86,7 @@ export class MagicalItemService {
     return this.magicalItemModel.find({ characterId }).exec();
   }
   
-
-} 
+  async findMagicalItemsByCharacterId(characterId: string): Promise<MagicalItem[]> {
+    return this.magicalItemModel.find({ characterId }).exec();
+  }
+}

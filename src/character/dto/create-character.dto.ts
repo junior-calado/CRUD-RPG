@@ -1,11 +1,11 @@
 import { IsString, IsEnum, IsInt, Min, Max, IsOptional } from 'class-validator';
 
 export enum CharacterClass {
-  WARRIOR = 'Guerreiro',
-  MAGE = 'Mago',
-  ARCHER = 'Arqueiro',
-  ROGUE = 'Ladino',
-  BARD = 'Bardo',
+  WARRIOR = 'Warrior',
+  MAGE = 'Mage',
+  ARCHER = 'Archer',
+  ROGUE = 'Rogue',
+  BARD = 'Bard',
 }
 
 export class CreateCharacterDto {
@@ -36,4 +36,4 @@ export class CreateCharacterDto {
   @Min(1)
   @Max(10)
   defense: number;
-} 
+}

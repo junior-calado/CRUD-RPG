@@ -26,13 +26,26 @@ export class Character {
 
   @Prop({ required: true, min: 1, max: 10 })
   defense: number;
+
+  @Prop({ type: [{ type: String, ref: 'MagicalItem' }] })
+  magicalItems: string[];
 }
 
 export const CharacterSchema = SchemaFactory.createForClass(Character);
 
-CharacterSchema.pre('validate', function(next) {
+CharacterSchema.pre('validate', async function(next) {
   if (this.strength + this.defense !== 10) {
     this.invalidate('strength', 'Strength and defense must sum to 10');
   }
+
+  const amuletCount = await this.model('MagicalItem').countDocuments({
+    characterId: this.id,
+    type: 'Amuleto',
+  });
+
+  if (amuletCount > 1) {
+    this.invalidate('magicalItems', 'A character can only have one amulet');
+  }
+
   next();
-}); 
+});

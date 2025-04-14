@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Character, CharacterDocument } from './schemas/character.schema';
@@ -22,8 +22,27 @@ export class CharacterService {
     return this.characterModel.find().exec();
   }
 
-  async findOne(id: string): Promise<Character | null> {
-    return this.characterModel.findOne({ id }).exec();
+  async findOne(id: string): Promise<Character & { totalStrength: number; totalDefense: number }> {
+    const character = await this.characterModel
+      .findOne({ id })
+      .populate({
+        path: 'magicalItems',
+        select: 'name strength defense type',
+      })
+      .exec();
+
+    if (!character) {
+      throw new NotFoundException('Character not found');
+    }
+
+    const totalStrength = character.strength + (character.magicalItems as any[]).reduce((sum, item) => sum + (item.strength || 0), 0);
+    const totalDefense = character.defense + (character.magicalItems as any[]).reduce((sum, item) => sum + (item.defense || 0), 0);
+
+    return {
+      ...character.toObject(),
+      totalStrength,
+      totalDefense,
+    };
   }
 
   async updateAdventurerName(id: string, adventurerName: string): Promise<Character | null> {
@@ -41,7 +60,7 @@ export class CharacterService {
   async getTotalAttributes(id: string): Promise<{ totalStrength: number; totalDefense: number }> {
     const character = await this.findOne(id);
     if (!character) {
-      throw new Error('Character not found');
+      throw new NotFoundException('Character not found');
     }
 
     const magicalItems = await this.magicalItemService.findByCharacterId(id);
@@ -61,4 +80,4 @@ export class CharacterService {
       totalDefense,
     };
   }
-} 
+}
